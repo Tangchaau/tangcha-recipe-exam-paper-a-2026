@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>TangCha Recipe Exam — Paper A, Version 2</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #153642; background: #f2f7f6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #075b69; color: white; padding: 18px max(20px, calc((100vw - 1100px)/2)); }
+    header h1 { margin: 0 0 4px; font-size: 1.45rem; }
+    header p { margin: 0; opacity: .92; }
+    main { max-width: 1100px; margin: auto; padding: 12px; }
+    section, .card { background: white; border: 1px solid #d4e3e3; border-radius: 16px; padding: 18px; box-shadow: 0 2px 12px #1748500b; }
+    h2 { margin-top: 0; }
+    label { display: block; font-weight: 650; margin-bottom: 7px; }
+    input[type=text], input[type=number] { width: 100%; min-height: 52px; border: 2px solid #afc6c8; border-radius: 9px; padding: 10px 12px; font: inherit; color: #153642; background: white; }
+    input:focus { outline: 3px solid #f3cb54; border-color: #075b69; }
+    button { font: inherit; font-weight: 650; border: 0; border-radius: 10px; min-height: 52px; padding: 9px 19px; background: #075b69; color: white; cursor: pointer; }
+    button.secondary { background: #deebec; color: #153642; }
+    button.danger { background: #7c2831; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .muted { color: #506b71; }
+    .notice { border-left: 5px solid #d49b10; background: #fff8df; padding: 11px 14px; margin: 15px 0; border-radius: 5px; }
+    .error { border-left-color: #b33a45; background: #fff0f1; }
+    .hidden { display: none !important; }
+    .topline { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+    progress { width: 100%; height: 17px; accent-color: #0b7d8b; }
+    .layout { display: grid; grid-template-columns: 1fr 248px; gap: 16px; margin-top: 16px; }
+    .question-title { font-size: 1.35rem; line-height: 1.3; margin: 8px 0 10px; }
+    .category { color: #075b69; font-weight: 750; font-size: .92rem; }
+    .order { border-left: 5px solid #0b7d8b; background: #eef8f7; padding: 14px; border-radius: 6px; font-size: 1.08rem; line-height: 1.5; margin: 0 0 18px; white-space: pre-wrap; }
+    .field { margin: 17px 0; }
+    .unit { margin-left: 6px; color: #506b71; }
+    .choice { display: flex; align-items: flex-start; gap: 10px; border: 2px solid #d0e0e1; border-radius: 10px; padding: 13px; margin: 10px 0; cursor: pointer; font-weight: 500; }
+    .choice:has(input:checked) { border-color: #087988; background: #e4f5f5; }
+    .choice input { transform: scale(1.4); margin: 4px 8px 0 2px; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .jump { min-height: 44px; padding: 4px; background: #dfeaec; color: #153642; }
+    .jump.done { background: #c6ecd6; }
+    .jump.current { outline: 3px solid #e1a820; }
+    .jump.missing { background: #ffdfdd; }
+    .nav { justify-content: space-between; margin-top: 28px; }
+    .review-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 8px; margin: 16px 0 22px; }
+    .review-list button { background: #ffdfdd; color: #7c2831; }
+    .sheet { margin-top: 18px; }
+    .sheet article { border-bottom: 1px solid #cbdadb; padding: 12px 0; break-inside: avoid; }
+    .sheet p { white-space: pre-wrap; margin: 4px 0; }
+    @media (max-width: 730px) { .layout { grid-template-columns: 1fr; } .grid { grid-template-columns: repeat(7, 1fr); } section, .card { padding: 17px; } }
+    @media print { header, .no-print, #intro, #exam, #review { display: none !important; } main { max-width: none; padding: 0; } #printable { display: block !important; border: 0; box-shadow: none; } }
+  </style>
+</head>
+<body>
+<header><h1>TangCha Recipe Exam — Paper A, Version 2</h1><p>40 questions · English · saved on this tablet</p><p id="offlineStatus" role="status">Checking offline availability…</p></header>
+<main>
+  <section id="intro">
+    <h2>Start or resume</h2>
+    <p>Enter your name exactly as it should appear on your answer sheet. Each question shows a customer order. Fill in the ingredients and quantities that apply to that drink. Choose one answer for a multiple-choice question.</p>
+    <p>This exam does not submit your answers online. Export the answer file and give it to your manager.</p>
+    <div id="storageWarning" class="notice error hidden"></div>
+    <div class="field"><label for="name">Employee name</label><input id="name" type="text" autocomplete="name" maxlength="100"></div>
+    <div id="resumeBox" class="notice hidden"></div>
+    <div class="row"><button id="startBtn">Start new exam</button><button id="resumeBtn" class="secondary hidden">Resume saved exam</button><button id="discardBtn" class="danger hidden">Discard saved draft</button></div>
+    <p class="muted">One draft is kept for this exam version on this browser. Export it before another person starts. Earlier papers and exported files are not changed.</p>
+  </section>
+  <section id="exam" class="hidden">
+    <div class="topline"><strong id="studentLine"></strong><span id="savedLine" class="muted"></span></div>
+    <progress id="progress" max="40" value="0"></progress>
+    <div class="layout">
+      <div class="card">
+        <span id="category" class="category"></span>
+        <div id="questionTitle" class="question-title"></div>
+        <p id="scenario" class="order"></p>
+        <div id="answerInputs"></div>
+        <div class="row nav no-print"><button id="prevBtn" class="secondary">Previous</button><button id="nextBtn">Next</button></div>
+      </div>
+      <aside class="card no-print"><h2>Questions</h2><p class="muted">Green = answered. Red = still blank.</p><div id="jumpGrid" class="grid"></div><p><button id="reviewBtn" class="secondary" style="width:100%">Review &amp; export</button></p></aside>
+    </div>
+  </section>
+  <section id="review" class="hidden">
+    <h2>Review your answers</h2><p id="reviewSummary"></p><div id="missingList" class="review-list"></div>
+    <div class="notice">Export creates a JSON answer file on this tablet. It is <strong>not sent</strong> to your manager. Give the downloaded file to your manager manually.</div>
+    <div class="row no-print"><button id="backBtn" class="secondary">Back to questions</button><button id="exportBtn">Finish &amp; export JSON</button><button id="printBtn" class="secondary">Show printable answer sheet</button></div>
+    <p id="exportStatus" class="muted" role="status"></p>
+  </section>
+  <section id="printable" class="sheet hidden"><h2>TangCha Recipe Exam — Paper A V2 — Student Answers</h2><p id="printMeta"></p><div id="printBody"></div><div class="row no-print"><button id="printNowBtn">Print or save as PDF</button><button id="closePrintBtn" class="secondary">Close answer sheet</button></div></section>
+</main>
+<script>
+"use strict";
+const VERSION = "TC-RECIPE-2026-10-03-PAPER-A-V2-40Q";
+const STORAGE_KEY = "tangcha-recipe-exam-draft-" + VERSION;
+const N = (id, label, unit) => ({id:id, label:label, unit:unit, numeric:true});
+const T = (id, label) => ({id:id, label:label, numeric:false});
+const F = (id, category, title, order, fields) => ({id:id, category:category, title:title, prompt:order, type:"fill", fields:fields});
+const C = (id, category, title, order, options) => ({id:id, category:category, title:title, prompt:order, type:"choice", options:options.map((label, index) => ({id:String.fromCharCode(65 + index), label:label}))});
+const QUESTIONS = [
+  F("Q01","Classic Milk Tea","Tang's Milk Tea — 500 mL","100% Sugar · 100% Ice · No added topping",[N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q02","Classic Milk Tea","Tang's Pearl Milk Tea — 500 mL","50% Sugar · 100% Ice · Built-in Pearls · Add one standard Aloe Vera portion",[N("pearls","Built-in Pearls","spoon"),N("aloe","Added Aloe Vera","spoon"),N("sugar","Final added sugar","mL"),N("shakerIce","Shaker ice: fill to line","line number"),T("shakerFill","Fill Shaker with"),N("shakerLine","Fill Shaker to line","line number"),T("filter","After shaking, what happens to the Shaker ice?"),N("cupIce","Serving Cup ice","% of cup")]),
+  F("Q03","Classic Milk Tea","Brown Sugar Pearl Milk Tea — 700 mL","75% Sugar · 100% Ice · Built-in Brown Sugar Pearls",[N("pearls","Brown Sugar Pearls","spoons"),N("wall","Brown Sugar Syrup on cup wall","pumps"),N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  C("Q04","Classic Milk Tea","Roasted Brulee Pearl Milk Tea — 500 mL","Standard cold drink · Built-in Brulee. Which workflow applies?",["Model B solely because Brulee is included.","Model C because the drink contains a topping.","Model A; stir the drink base before adding and roasting Brulee."]),
+  F("Q05","Classic Milk Tea","Taro Milk Tea — 500 mL","25% Sugar · Soy Milk instead of standard milk · No Ice · No added topping",[T("ingredientModel","Which model supplies the Soy Milk ingredient recipe?"),T("operationModel","Which model supplies the No Ice shaking steps?"),N("soyBase","Soy Milk blended with powder","mL"),N("taro","Taro Powder","scoops"),N("sugar","Added sugar","mL"),N("shakerIce","Shaker ice: fill to line","line number"),T("shakerTop","Complete Shaker with"),N("shakerFillLine","Complete Shaker to line","line number"),T("iceRemoval","After shaking, what happens to all ice?"),T("cupTop","If Serving Cup is short, top up with")]),
+  F("Q06","Classic Milk Tea","Taro Coconut Milk Tea — 700 mL","100% Sugar · Fresh Milk instead of standard milk · 100% Ice",[N("freshMilk","Fresh Milk in powder mixture","mL"),N("taro","Taro Powder","scoops"),N("coconut","Coconut Powder","scoops"),N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Finish to Top with")]),
+  F("Q07","Classic Milk Tea","Oreo & Brulee Milk Tea — 500 mL","75% Sugar · 100% Ice · Built-in Oreo and Brulee",[N("sugar","Added sugar","mL"),T("iceLine","Serving Cup ice: fill to which line?"),T("teaLine","Milk Tea: fill to which line?"),T("stir","How many circles to stir the base?"),N("oreo","Oreo decoration","small spoon"),T("finish","What is added and finished before the Oreo decoration?")]),
+  F("Q08","Classic Milk Tea","Oolong Milk Tea — 700 mL","100% Sugar · 100% Ice · Soy Milk instead of standard milk",[N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("tea","Which tea fills half the remaining cup space?"),T("milk","Fill the rest to Top with")]),
+  F("Q09","Classic Milk Tea","Jasmine Green Milk Tea — 700 mL","25% Sugar · 100% Ice · No added topping",[N("sugar","Added sugar","mL"),N("tea","Green Tea","mL"),N("powder","Milk Powder","scoops"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q10","Classic Milk Tea","Caramel Milk Tea — 500 mL","50% Sugar · 100% Ice · No added topping",[N("sugar","Added sugar","mL"),N("syrup","Caramel Syrup","pump"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with which milk tea made for this order?")]),
+  F("Q11","Classic Milk Tea","Chocolate Milk Tea — 700 mL","75% Sugar · 100% Ice · No added topping",[N("sugar","Added sugar","mL"),N("base","Milk Tea measured into chocolate mixture","mL"),N("powder","Chocolate Powder","scoops"),N("ice","Serving Cup ice","% of cup"),T("fill","Finish to Top with")]),
+  F("Q12","Classic Milk Tea","Strawberry Milk Tea — 500 mL","100% Sugar · Fresh Milk instead of standard milk · 100% Ice",[N("sugar","Added sugar","mL"),N("syrup","Strawberry Syrup","pumps"),N("ice","Serving Cup ice","% of cup"),T("tea","Which tea fills half the remaining space?"),T("milk","Finish to Top with")]),
+  F("Q13","Fresh Fruit Tea","Lychee Green Tea — 700 mL","100% Sugar · 100% Ice · No added topping",[N("fruit","Whole Lychee fruit flesh","piece"),N("syrup","Lychee Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q14","Fresh Fruit Tea","Mango Green Tea — 700 mL","75% Sugar · 100% Ice · Customer selects Black Tea instead of default Green Tea",[N("pulp","Mango pulp","spoons"),N("syrup","Mango Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Selected tea base"),N("teaMl","Selected tea base quantity","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  C("Q15","Fresh Fruit Tea","Passionfruit Green Tea — 700 mL","100% Sugar · 100% Ice · Add two standard topping portions. Which added sugar and workflow are correct?",["25 mL, Model A.","20 mL, Model B.","20 mL, Model A.","15 mL, Model B."]),
+  F("Q16","Fresh Fruit Tea","Kiwi & Mango Green Tea — 700 mL","100% Sugar · 100% Ice · No added topping",[N("kiwi","Fresh peeled Kiwi","fruit"),N("mango","Mango pulp","spoons"),N("kiwiSyrup","Kiwi Syrup","pumps"),N("mangoSyrup","Mango Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),T("kiwiPrep","How is the fresh Kiwi prepared in the cup?"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q17","Fresh Fruit Tea","Kiwi & Pineapple Four Season Tea — 700 mL","75% Sugar · 100% Ice · No added topping",[N("kiwi","Fresh peeled Kiwi","fruit"),N("pineapple","Pineapple pulp","spoons"),N("kiwiSyrup","Kiwi Syrup","pumps"),N("pineappleSyrup","Pineapple Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),T("kiwiPrep","How is the fresh Kiwi prepared in the cup?"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q18","Fresh Fruit Tea","Lemon Black Tea — 700 mL","100% Sugar · 100% Ice · Standard direct-cup Model A recipe",[N("lemon","Fresh Lemon","slices"),T("lemonPrep","How are the Lemon slices prepared?"),N("kumquat","Kumquat Syrup","pumps"),N("honey","Honey","mL"),N("juice","Lemon Juice","mL"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q19","Fresh Fruit Tea","Tang's Handmade Lime Tea — 700 mL","25% Sugar · 100% Ice · No added topping",[N("lime","Fresh peeled Lime","fruit"),T("limePrep","How is the fresh Lime prepared?"),N("kumquat","Kumquat Syrup","pumps"),N("honey","Honey","mL"),N("juice","Lime Juice","mL"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q20","Fresh Fruit Tea","Honey Grapefruit Green Tea — 700 mL","100% Sugar · 100% Ice · No added topping",[N("pulp","Grapefruit pulp","spoons"),N("honey","Honey","mL"),N("syrup","Grapefruit Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  C("Q21","Fresh Fruit Tea","Wintermelon & Lemon Tea — 700 mL","Customer requests 50% Sugar. What should the order-taking employee do?",["Halve the Lemon Juice to simulate 50% Sugar.","Explain that a percentage-sugar adjustment is unavailable for this drink.","Halve the Wintermelon Tea to simulate 50% Sugar.","Add half a normal fruit-tea sugar portion."]),
+  F("Q22","Tang's Creative Mix","Lychee Fruit Yakult — 700 mL","100% Sugar · 100% Ice · No added topping",[N("lychee","Whole Lychee fruit flesh","piece"),N("yakult","Yakult","bottle"),N("syrup","Lychee Syrup","pumps"),N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Fill to Top with")]),
+  F("Q23","Tang's Creative Mix","Matcha Latte — 700 mL","50% Sugar · Soy Milk instead of standard milk · 100% Ice",[N("water","Cold Water","mL"),N("matcha","Matcha Powder","scoops"),N("sugar","Added sugar","mL"),N("ice","Serving Cup ice","% of cup"),T("fill","Finish to Top with")]),
+  F("Q24","Tang's Creative Mix","Chocolate Milk Shake — 700 mL","Standard fixed-sugar and fixed-ice recipe · No customer sugar or ice adjustment",[N("wall","Chocolate Syrup on cup wall","pumps"),N("powder","Chocolate Powder","scoops"),N("cream","Ice Cream","scoop"),N("milk","Milk","mL"),N("sugar","Standard added sugar","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  F("Q25","Tang's Creative Mix","Kiwi & Watermelon Juice — standard serving","Standard recipe · No cup size is specified in the printed SOP",[N("watermelon","Watermelon","cup"),N("kiwi","Fresh Kiwi","spoon"),N("powder","Watermelon Powder","scoop"),N("syrup","Kiwi Syrup","pump"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  F("Q26","Smoothie","Strawberry Crush Smoothie — 700 mL","50% Sugar · Standard recipe ice · Add two standard topping portions",[N("wall","Strawberry Syrup on cup wall","pumps"),N("fruit","Strawberry fruit","large spoon"),N("blendSyrup","Strawberry Syrup in blend","pumps"),N("sugar","Added sugar","mL"),N("milk","Milk","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number"),T("toppingPlace","Where do the added toppings go?")]),
+  F("Q27","Smoothie","Mango Mood Smoothie — 700 mL","100% Sugar · Standard recipe ice · No added topping",[N("wall","Mango Syrup on cup wall","pumps"),N("pulp","Mango pulp","spoons"),N("blendSyrup","Mango Syrup in blend","pumps"),N("sugar","Added sugar","mL"),N("milk","Milk","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  C("Q28","Smoothie","Cookie Chocolate Smoothie — 700 mL","75% Sugar · Standard recipe ice · Add two standard topping portions. What is the final added sugar?",["30 mL.","45 mL.","35 mL.","33.75 mL."]),
+  F("Q29","Smoothie","Ice Cream Matcha Smoothie — 700 mL","25% Sugar · Standard recipe ice · No added topping",[N("matcha","Matcha Powder","scoops"),N("milkPowder","Milk Powder","scoops"),N("cream","Ice Cream","scoop"),N("sugar","Added sugar","mL"),N("water","Water","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  F("Q30","Smoothie","Coconut Paradise Smoothie — 700 mL","100% Sugar · Soy Milk instead of standard milk · Standard recipe ice",[N("coconut","Coconut Powder","scoops"),N("soyMilk","Soy Milk","mL"),N("sugar","Added sugar","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  F("Q31","Sparkling Series","Sparkling Passionfruit with Rainbow Jelly — 700 mL","100% Sugar · Standard cold recipe · Built-in Rainbow Jelly",[N("jelly","Rainbow Jelly","spoon"),N("seeds","Passionfruit seeds","spoons"),N("syrup","Passionfruit Syrup","pumps"),N("sugar","Added sugar","mL"),T("stir","How many circles to stir the drink base?"),T("sparkling","How is Sparkling Water added before the final colour layer?"),T("colour","Final colour layer"),T("finalMix","Should the completed drink be shaken?")]),
+  F("Q32","Frappe","Mango Fruit Frappe — 700 mL","100% Sugar · Standard recipe ice · No added topping",[N("pulp","Mango pulp","spoons"),N("syrup","Mango Syrup","pumps"),N("sugar","Added sugar","mL"),T("teaType","Tea base"),N("teaMl","Tea base quantity","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  C("Q33","Pure Tea","Jasmine Green Pure Tea — 700 mL","100% Sugar · No Ice. Which workflow, Green Tea quantity and ice handling are correct?",["Model A, 300 mL; add no ice to the Shaker.","Model B, 350 mL; shake with ice and filter all ice before serving.","Model C, 350 mL; pour Shaker ice into the Serving Cup.","Model B, 300 mL; shake with ice and filter all ice before serving."]),
+  F("Q34","Energy Drink","Passionfruit Rush — 700 mL","Standard fixed-ice recipe · Customer sugar adjustment unavailable",[N("jelly","Rainbow Jelly","spoon"),N("syrup","Passionfruit Syrup","pumps"),N("redBull","Red Bull 275 mL","can"),T("ice","Serving Cup ice: fill to which line?"),T("stir","How many circles to stir the initial base?"),T("tea","Fill to Top with which tea?"),T("colour","Final colour layer"),T("finalMix","Should the completed drink be shaken?")]),
+  F("Q35","Protein Shake","Chocolate Monster — 700 mL","Standard recipe ice",[N("wall","Chocolate Syrup on cup wall","pumps"),N("protein","Protein Powder","scoops"),N("chocolate","Chocolate Powder","scoops"),N("milk","Milk","mL"),N("ice","Shaker-measured ice for Blender: fill to line","line number")]),
+  C("Q36","Topping rules","Two topping portions","For a regular drink other than Smoothie or Frappe, the total topping count reaches two and at least 5 mL sugar remains before the topping adjustment. How much extra added sugar is removed solely because of that count?",["0 mL; topping count never changes added sugar.","5 mL once for the total topping count.","5 mL for each topping portion, or 10 mL total.","10 mL once for the total topping count."]),
+  C("Q37","Topping rules","Model B threshold — 700 mL","For a regular 700 mL drink eligible for added toppings, at what total topping count does the topping rule first route the drink to Model B?",["One topping portion.","Two topping portions.","Three topping portions.","Four topping portions."]),
+  C("Q38","Milk substitution","Oolong Milk Tea — 700 mL","Customer selects Soy Milk instead of standard milk and keeps standard ice. Which product-specific Model C finish applies?",["Use Milk Powder as usual and add Soy Milk at the end.","Fill the cup entirely with Soy Milk; no Oolong Tea is used.","After serving ice, fill half the remaining space with Oolong Tea and finish to Top with Soy Milk.","Make standard Oolong Milk Tea first, then stir in Soy Milk."]),
+  C("Q39","Combined workflow","Taro Milk Tea — 500 mL","Customer selects Soy Milk and No Ice. Which combined workflow is correct?",["Use Model B ingredients and put no ice in the Shaker.","Use Model C ingredients, then Model B No Ice steps: shake with ice, filter all ice, and use Soy Milk for any top-up.","Use Model C ingredients and serve the Shaker ice in the cup.","Use Model A direct-cup steps and replace the top-up with Water."]),
+  C("Q40","Sugar option availability","Customer sugar adjustments","Which list contains only drinks for which customers cannot choose a sugar percentage?",["Wintermelon & Lemon Tea, Matcha Latte, Energy Drink.","Chocolate Milk Shake, Mango Green Tea, Energy Drink.","Wintermelon & Lemon Tea, Chocolate Milk Shake, Energy Drink.","Tang's Milk Tea, Matcha Latte, Mango Green Tea."])
+];
+const $ = id => document.getElementById(id);
+let state = null;
+function escapeHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[ch]);
+}
+function testStorage() {
+  try { localStorage.setItem(STORAGE_KEY + "-test", "ok"); localStorage.removeItem(STORAGE_KEY + "-test"); return true; }
+  catch (_) { return false; }
+}
+function save() {
+  state.updatedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  $("savedLine").textContent = "Saved on this tablet at " + new Date(state.updatedAt).toLocaleTimeString();
+}
+function readDraft() {
+  try {
+    const item = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    return item && item.version === VERSION && item.answers && typeof item.name === "string" ? item : null;
+  } catch (_) { return null; }
+}
+function isComplete(q) {
+  const answer = state.answers[q.id];
+  if (!answer) return false;
+  if (q.type === "choice") return typeof answer.choice === "string" && answer.choice !== "";
+  return q.fields.every(f => typeof answer[f.id] === "string" && answer[f.id].trim() !== "");
+}
+function updateProgress() {
+  const done = QUESTIONS.filter(isComplete).length;
+  $("progress").value = done;
+  $("progress").max = QUESTIONS.length;
+  $("jumpGrid").innerHTML = QUESTIONS.map((q, i) => "<button class=\"jump " + (isComplete(q) ? "done" : "missing") + (i === state.index ? " current" : "") + "\" data-jump=\"" + i + "\" aria-label=\"Question " + (i + 1) + ", " + (isComplete(q) ? "answered" : "blank") + "\">" + (i + 1) + "</button>").join("");
+}
+function show(section) {
+  ["intro","exam","review","printable"].forEach(id => $(id).classList.toggle("hidden", id !== section));
+  window.scrollTo(0, 0);
+}
+function showQuestion(index) {
+  state.index = Math.max(0, Math.min(QUESTIONS.length - 1, index));
+  const q = QUESTIONS[state.index];
+  $("studentLine").textContent = state.name + " · Question " + (state.index + 1) + " of " + QUESTIONS.length;
+  $("category").textContent = q.category;
+  $("questionTitle").textContent = q.title;
+  $("scenario").textContent = q.prompt;
+  const answer = state.answers[q.id] || {};
+  if (q.type === "choice") {
+    $("answerInputs").innerHTML = q.options.map(o => "<label class=\"choice\"><input type=\"radio\" name=\"choice\" value=\"" + escapeHtml(o.id) + "\" " + (answer.choice === o.id ? "checked" : "") + "><span>" + escapeHtml(o.label) + "</span></label>").join("");
+    $("answerInputs").querySelectorAll('input[name="choice"]').forEach(input => input.addEventListener("change", () => { state.answers[q.id] = {choice:input.value}; save(); updateProgress(); }));
+  } else {
+    $("answerInputs").innerHTML = q.fields.map(f => "<div class=\"field\"><label for=\"field-" + escapeHtml(f.id) + "\">" + escapeHtml(f.label) + (f.unit ? "<span class=\"unit\">(" + escapeHtml(f.unit) + ")</span>" : "") + "</label><input id=\"field-" + escapeHtml(f.id) + "\" data-field=\"" + escapeHtml(f.id) + "\" type=\"" + (f.numeric ? "number" : "text") + "\" " + (f.numeric ? "inputmode=\"decimal\" step=\"any\"" : "") + " placeholder=\"Enter your answer\"></div>").join("");
+    $("answerInputs").querySelectorAll("[data-field]").forEach(input => {
+      input.value = answer[input.dataset.field] == null ? "" : answer[input.dataset.field];
+      input.addEventListener("input", () => { (state.answers[q.id] ||= {})[input.dataset.field] = input.value; save(); updateProgress(); });
+    });
+  }
+  $("prevBtn").disabled = state.index === 0;
+  $("nextBtn").textContent = state.index === QUESTIONS.length - 1 ? "Review & export" : "Next";
+  updateProgress(); save(); show("exam");
+}
+function review() {
+  const missing = QUESTIONS.filter(q => !isComplete(q));
+  $("reviewSummary").textContent = (QUESTIONS.length - missing.length) + " answered; " + missing.length + " incomplete. Select a red question to finish it, or export with blanks if you do not know the answer.";
+  $("missingList").innerHTML = missing.map(q => "<button data-missing=\"" + QUESTIONS.indexOf(q) + "\">Q" + (QUESTIONS.indexOf(q) + 1) + "</button>").join("");
+  $("exportBtn").textContent = missing.length ? "Export with blanks" : "Finish & export JSON";
+  $("exportStatus").textContent = "";
+  save(); show("review");
+}
+function payload() {
+  return {
+    format:"TangCha offline recipe exam answers", version:VERSION,
+    attemptId:state.attemptId, employeeName:state.name,
+    startedAt:state.startedAt, updatedAt:state.updatedAt, completedAt:state.completedAt,
+    questionCount:QUESTIONS.length,
+    responses:QUESTIONS.map((q, i) => ({number:i + 1, id:q.id, category:q.category, type:q.type, title:q.title, prompt:q.prompt, fields:q.fields || null, options:q.options || null, answer:state.answers[q.id] || {}}))
+  };
+}
+function exportJson() {
+  state.completedAt = new Date().toISOString(); save();
+  const cleanName = state.name.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-|-$/g, "") || "employee";
+  const filename = "TangCha_Recipe_Exam_A_V2_" + cleanName + "_" + state.attemptId + ".json";
+  const url = URL.createObjectURL(new Blob([JSON.stringify(payload(), null, 2)], {type:"application/json"}));
+  const link = document.createElement("a"); link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  $("exportStatus").textContent = "Download requested: " + filename + ". Check the browser's Downloads list and give the file to your manager. Your answers remain saved here.";
+}
+function printable() {
+  $("printMeta").textContent = state.name + " · " + VERSION + " · " + (state.completedAt ? new Date(state.completedAt).toLocaleString() : "Not yet exported");
+  $("printBody").innerHTML = QUESTIONS.map((q, i) => {
+    const answer = state.answers[q.id] || {};
+    const content = q.type === "choice" ? ((q.options.find(o => o.id === answer.choice) || {}).label || "[blank]") : q.fields.map(f => f.label + (f.unit ? " (" + f.unit + ")" : "") + ": " + (answer[f.id] == null || answer[f.id] === "" ? "[blank]" : answer[f.id])).join("\n");
+    return "<article><strong>Q" + (i + 1) + ". " + escapeHtml(q.title) + "</strong><p>" + escapeHtml(q.prompt) + "</p><p>" + escapeHtml(content) + "</p></article>";
+  }).join("");
+  show("printable");
+}
+function init() {
+  if (!testStorage()) {
+    $("storageWarning").textContent = "This browser cannot save local progress. Do not start here. Open this link in Chrome on the tablet.";
+    $("storageWarning").classList.remove("hidden"); $("startBtn").disabled = true; return;
+  }
+  const prior = readDraft();
+  if (prior) {
+    $("resumeBox").textContent = "Saved draft for " + prior.name + " · " + new Date(prior.updatedAt).toLocaleString() + ". Export it before another person starts.";
+    $("resumeBox").classList.remove("hidden"); $("resumeBtn").classList.remove("hidden"); $("discardBtn").classList.remove("hidden"); $("name").value = prior.name;
+  }
+  $("startBtn").addEventListener("click", () => {
+    const name = $("name").value.trim();
+    if (!name) { $("name").focus(); alert("Enter your name first."); return; }
+    if (readDraft() && !confirm("A saved local exam exists. Starting a new exam will replace this version's local draft. Export it first if you need it. Start a new exam now?")) return;
+    state = {version:VERSION, attemptId:new Date().toISOString().replace(/[:.]/g,"-"), name:name, startedAt:new Date().toISOString(), updatedAt:null, completedAt:null, index:0, answers:{}};
+    showQuestion(0);
+  });
+  $("resumeBtn").addEventListener("click", () => { state = readDraft(); if (state) showQuestion(state.index || 0); });
+  $("discardBtn").addEventListener("click", () => {
+    if (!confirm("Discard this version's saved draft? Export it first if you need it. Exported files are not deleted.")) return;
+    localStorage.removeItem(STORAGE_KEY); state = null; $("name").value = "";
+    $("resumeBox").classList.add("hidden"); $("resumeBtn").classList.add("hidden"); $("discardBtn").classList.add("hidden"); show("intro");
+  });
+  $("prevBtn").addEventListener("click", () => showQuestion(state.index - 1));
+  $("nextBtn").addEventListener("click", () => state.index === QUESTIONS.length - 1 ? review() : showQuestion(state.index + 1));
+  $("jumpGrid").addEventListener("click", e => { const n = e.target.closest("[data-jump]")?.dataset.jump; if (n !== undefined) showQuestion(Number(n)); });
+  $("reviewBtn").addEventListener("click", review);
+  $("missingList").addEventListener("click", e => { const n = e.target.closest("[data-missing]")?.dataset.missing; if (n !== undefined) showQuestion(Number(n)); });
+  $("backBtn").addEventListener("click", () => showQuestion(state.index));
+  $("exportBtn").addEventListener("click", exportJson);
+  $("printBtn").addEventListener("click", printable);
+  $("printNowBtn").addEventListener("click", () => window.print());
+  $("closePrintBtn").addEventListener("click", review);
+}
+init();
+if ((location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1") && "serviceWorker" in navigator) {
+  const offlineStatus = $("offlineStatus");
+  const childWorkerPath = new URL("./sw.js", location.href).pathname;
+  const showOfflineReady = () => {
+    if (navigator.serviceWorker.controller && new URL(navigator.serviceWorker.controller.scriptURL).pathname === childWorkerPath) {
+      offlineStatus.textContent = "Offline ready on this browser. You can disconnect after this message appears.";
+    }
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", showOfflineReady);
+  navigator.serviceWorker.register("./sw.js").then(showOfflineReady).catch(() => {
+    offlineStatus.textContent = "Offline not ready. Keep this browser connected and reopen the page before disconnecting.";
+  });
+} else {
+  $("offlineStatus").textContent = "Offline not available in this browser. Open the online link in Chrome.";
+}
+</script>
+</body>
+</html>
